@@ -47,6 +47,7 @@ cd bahar-kargo-scraper
 ```
 EMAIL=your_email@example.com
 PASS=your_password
+DRIVER=chromedriver.exe
 ```
 
 4. Run the script:

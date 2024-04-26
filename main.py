@@ -31,45 +31,54 @@ password = driver.find_element(
     By.XPATH,
     "/html/body/div[1]/section/div/div/div[1]/form/div/div/div[1]/div[2]/input",
 )
+
 email.send_keys(environ["EMAIL"])
 password.send_keys(environ["PASS"])
 enter = driver.find_element(
-    By.XPATH, "/html/body/div[1]/section/div/div/div[1]/form/div/div/div[2]/p/button"
+    By.XPATH,
+    "/html/body/div[1]/section/div/div/div[1]/form/div/div/div[2]/p/button",
 )
 enter.click()
 sleep(1.2)
-print("Getting pages...")
 driver.get(URL_PAGE_COUNT)
 sleep(1.2)
-page_count = driver.find_element(By.CLASS_NAME, "pagination")
-page_count = len(page_count.text.split()) - 2
+try:
+    login_banner = driver.find_element(
+        By.XPATH, "/html/body/div[1]/div[3]/div[1]/div/div/div/h1"
+    )
+    print("Could not login")
+    exit(1)
+except Exception:
+    print("Getting pages...")
+    page_count = driver.find_element(By.CLASS_NAME, "pagination")
+    page_count = len(page_count.text.split()) - 2
 
-all_items = []
+    all_items = []
 
-for page in range(1, page_count + 1):
-    print(f"Processing page {page}...")
-    driver.get(f"{URL_PAGE_COUNT}&page={page}")
-    sleep(1.2)
+    for page in range(1, page_count + 1):
+        print(f"Processing page {page}...")
+        driver.get(f"{URL_PAGE_COUNT}&page={page}")
+        sleep(1.2)
 
-    card_items = driver.find_elements(By.CLASS_NAME, "card-item")
-    for i in card_items:
-        item = i.find_element(By.CLASS_NAME, "card-item__output").text
-        if item:
-            if "₼" in item:
-                parts = item.split()
-                dollar = float(parts[0].replace("$", ""))
-                manat = float(parts[2])
-                all_items.append((dollar, manat))
+        card_items = driver.find_elements(By.CLASS_NAME, "card-item")
+        for i in card_items:
+            item = i.find_element(By.CLASS_NAME, "card-item__output").text
+            if item:
+                if "₼" in item:
+                    parts = item.split()
+                    dollar = float(parts[0].replace("$", ""))
+                    manat = float(parts[2])
+                    all_items.append((dollar, manat))
 
-print(
-    "\nPaketler :",
-    (
-        len([i[1] for i in all_items])
-        if len([i[1] for i in all_items]) == len([i[0] for i in all_items])
-        else None
-    ),
-)
-print("Manat    :", round(sum([i[1] for i in all_items]), 2), "₼")
-print("Dollar   :", round(sum([i[0] for i in all_items]), 2), "$")
+    print(
+        "\nPaketler :",
+        (
+            len([i[1] for i in all_items])
+            if len([i[1] for i in all_items]) == len([i[0] for i in all_items])
+            else None
+        ),
+    )
+    print("Manat    :", round(sum([i[1] for i in all_items]), 2), "₼")
+    print("Dollar   :", round(sum([i[0] for i in all_items]), 2), "$")
 
-driver.quit()
+    driver.quit()
